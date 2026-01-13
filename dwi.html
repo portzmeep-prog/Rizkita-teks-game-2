@@ -1,0 +1,566 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Shuffle, Lightbulb, Menu, X, Trophy, Star, Volume2, VolumeX } from 'lucide-react';
+
+// --- DATA LEVEL (SAMPEL 100 STAGE - Full Data) ---
+const LEVELS = [
+  { letters: "API", words: ["API", "PAI"] },
+  { letters: "UAK", words: ["AKU", "KAU", "UAK"] },
+  { letters: "IBA", words: ["ABI", "IBA", "BIA"] },
+  { letters: "RIA", words: ["AIR", "RIA", "ARI"] },
+  { letters: "BUA", words: ["ABU", "BAU", "BUA"] },
+  { letters: "TOP", words: ["TOP", "POT"] },
+  { letters: "TAS", words: ["TAS", "SAT"] },
+  { letters: "UBI", words: ["IBU", "UBI", "BUI"] },
+  { letters: "EJA", words: ["EJA", "IJA"] },
+  { letters: "MAS", words: ["MAS", "SAM"] },
+  { letters: "HAL", words: ["HAL", "LAH"] },
+  { letters: "GOL", words: ["GOL", "LOG"] },
+  { letters: "DUA", words: ["DUA", "ADU", "UDA"] },
+  { letters: "IGA", words: ["IGA", "GAI"] },
+  { letters: "KUE", words: ["KUE"] },
+  { letters: "REL", words: ["REL", "LER"] },
+  { letters: "JET", words: ["JET"] },
+  { letters: "POS", words: ["POS", "SOP"] },
+  { letters: "HAK", words: ["HAK", "KAH"] },
+  { letters: "YEN", words: ["YEN"] },
+  // Level 21-50 (4 Huruf)
+  { letters: "BUKU", words: ["BUKU", "KUBU"] },
+  { letters: "KATA", words: ["KATA", "AKTA"] },
+  { letters: "LARI", words: ["LARI", "LIAR", "AIR", "RIA"] },
+  { letters: "BACA", words: ["BACA", "ACA"] },
+  { letters: "SAPA", words: ["SAPA", "APA", "PAS", "ASA"] },
+  { letters: "MAJU", words: ["MAJU", "JAMU", "JUA", "MAU"] },
+  { letters: "PAGI", words: ["PAGI", "API"] },
+  { letters: "GUNA", words: ["GUNA", "UANG", "ANU", "GUA"] },
+  { letters: "RASA", words: ["RASA", "ASAR", "ASA", "SAR"] },
+  { letters: "NAMA", words: ["NAMA", "MANA", "AMAN", "ANA"] },
+  { letters: "KOTA", words: ["KOTA", "OTAK", "TAK", "OKA"] },
+  { letters: "BOLA", words: ["BOLA", "LABO", "BAL"] },
+  { letters: "MATA", words: ["MATA", "ATMA", "AMA"] },
+  { letters: "CARI", words: ["CARI", "CAIR", "RIA", "AIR"] },
+  { letters: "LUAS", words: ["LUAS", "LUSA", "USA"] },
+  { letters: "BIRU", words: ["BIRU", "RIBU", "UBI", "IBU"] },
+  { letters: "RUSA", words: ["RUSA", "ARUS", "RUAS", "USA"] },
+  { letters: "SATE", words: ["SATE", "ASET", "TES", "TAS"] },
+  { letters: "TIGA", words: ["TIGA", "GIAT"] },
+  { letters: "LIMA", words: ["LIMA", "MALI", "MAIL", "AMI"] },
+  { letters: "DUKA", words: ["DUKA", "KUDA", "KAU", "ADU"] },
+  { letters: "SUKA", words: ["SUKA", "KAUS", "AKU", "KAU"] },
+  { letters: "PETA", words: ["PETA", "TEPA", "PATI", "API"] },
+  { letters: "GIGI", words: ["GIGI"] },
+  { letters: "KOPI", words: ["KOPI"] },
+  { letters: "MEJA", words: ["MEJA", "JAM"] },
+  { letters: "ALAM", words: ["ALAM", "LAMA", "AMAL", "ALA"] },
+  { letters: "IKAN", words: ["IKAN", "KIAN", "KAIN", "ANI"] },
+  { letters: "OBAT", words: ["OBAT", "BATA", "BOT"] },
+  { letters: "SUSU", words: ["SUSU"] },
+  // Level 51-80 (5 Huruf)
+  { letters: "MAKAN", words: ["MAKAN", "MAKNA", "MANA", "ANAK", "AKAN"] },
+  { letters: "MINUM", words: ["MINUM", "MUMI", "IBU"] },
+  { letters: "HUJAN", words: ["HUJAN", "HAJI", "JAUH", "HUN"] },
+  { letters: "PANAS", words: ["PANAS", "SAPAN", "NAAS", "SAPA", "SANA"] },
+  { letters: "SEHAT", words: ["SEHAT", "SEAT", "TAS", "TES", "SET"] },
+  { letters: "MURAH", words: ["MURAH", "RUMAH", "UMRAH", "HARUM", "RUAH"] },
+  { letters: "TIKUS", words: ["TIKUS", "SIKUT", "USIK", "SITU", "ISU"] },
+  { letters: "LAPAR", words: ["LAPAR", "PARA", "APAR", "APA", "ALA"] },
+  { letters: "SUARA", words: ["SUARA", "RUAS", "ARUS", "RASA", "ASA"] },
+  { letters: "KASUR", words: ["KASUR", "RUSAK", "KURA", "ARUS", "RAK"] },
+  { letters: "TANAH", words: ["TANAH", "TAHAN", "HANTU", "TAHU"] },
+  { letters: "BADAN", words: ["BADAN", "BANDA", "NADA", "ABAD", "DAN"] },
+  { letters: "MANIS", words: ["MANIS", "ASIN", "MAIN", "AMIN", "SIM"] },
+  { letters: "HITAM", words: ["HITAM", "MATI", "HATI", "TAHI"] },
+  { letters: "PUTIH", words: ["PUTIH", "UPTI", "TIPU", "ITU", "IUP"] },
+  { letters: "MERAH", words: ["MERAH", "REMAH", "RAME", "AREM"] },
+  { letters: "BARAT", words: ["BARAT", "BATAR", "RATA", "BATA", "ARAB"] },
+  { letters: "TIMUR", words: ["TIMUR", "TRIM", "TRI", "MUR", "RUM"] },
+  { letters: "KUNCI", words: ["KUNCI", "CUK", "UNI", "NIK"] },
+  { letters: "PINTU", words: ["PINTU", "TIPU", "UNIT", "PUN", "ITU"] },
+  { letters: "LAMPU", words: ["LAMPU", "AMPUH", "MALU", "PALU", "LUP"] },
+  { letters: "KURSI", words: ["KURSI", "USIR", "URI", "ISU", "SKI"] },
+  { letters: "MEWAH", words: ["MEWAH", "AWEH"] },
+  { letters: "BIASA", words: ["BIASA", "SABA", "BASA", "BISA", "ASA"] },
+  { letters: "CEPAT", words: ["CEPAT", "PECAT", "TAPE", "CAP"] },
+  { letters: "TEPAT", words: ["TEPAT", "TETAP", "PATET", "PETA"] },
+  { letters: "SALAH", words: ["SALAH", "ASAL", "SAH", "HAL", "LAS"] },
+  { letters: "BENAR", words: ["BENAR", "REBAN", "BENA", "ERA", "BAN"] },
+  { letters: "KAKAK", words: ["KAKAK", "KAK"] },
+  { letters: "NENEK", words: ["NENEK", "KENE"] },
+  // Level 81-100 (6 Huruf)
+  { letters: "KANTOR", words: ["KANTOR", "KORAN", "KOTAK", "ROTAK", "OTA", "RAK"] },
+  { letters: "SEKOLA", words: ["SEKOLA", "KELAS", "SALE", "SOAL", "KAOS", "LAS"] },
+  { letters: "BELAJAR", words: ["BELAJAR", "AJAR", "RELA", "AREA", "BAJA", "JALA"] },
+  { letters: "MANTAN", words: ["MANTAN", "TAMAN", "TANAM", "MANA", "NAMA", "MAT"] },
+  { letters: "CAHAYA", words: ["CAHAYA", "AYAH", "ACA"] },
+  { letters: "DENGAR", words: ["DENGAR", "RADEN", "EDAN", "AGEN", "DAN"] },
+  { letters: "TOLONG", words: ["TOLONG", "GOLONG", "TONG", "GOL", "OTO"] },
+  { letters: "HANCUR", words: ["HANCUR", "RACUN", "ACUH", "NUR", "CAH"] },
+  { letters: "BANGUN", words: ["BANGUN", "BUNGA", "GUNA", "UANG", "BAU"] },
+  { letters: "SENANG", words: ["SENANG", "NANAS", "SANG", "GEN", "GAS"] },
+  { letters: "HILANG", words: ["HILANG", "HALI", "ALIH", "ILA", "HAL"] },
+  { letters: "PULANG", words: ["PULANG", "GAUL", "PALUNG", "GULA", "PULA"] },
+  { letters: "DATANG", words: ["DATANG", "TANDA", "NADA", "DANA", "ADA"] },
+  { letters: "TERIMA", words: ["TERIMA", "MATERI", "MITRA", "TEMA", "AIR"] },
+  { letters: "KASIH", words: ["KASIH", "KHAS", "KISAH", "SAH", "HAI"] },
+  { letters: "SAYANG", words: ["SAYANG", "ANGSA", "SANA", "YANG", "ASA"] },
+  { letters: "CANTIK", words: ["CANTIK", "CINTA", "NAIK", "IKAN", "KAIN"] },
+  { letters: "GANTENG", words: ["GANTENG", "TEGANG", "TANG", "GEN", "NET"] },
+  { letters: "PINTER", words: ["PINTER", "PETIR", "TREN", "PERI", "TIP"] },
+  { letters: "SUKSES", words: ["SUKSES", "SESAK", "KUS", "ESA"] }
+];
+
+export default function WordConnectPro() {
+  const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
+  const [foundWords, setFoundWords] = useState([]);
+  const [shuffledLetters, setShuffledLetters] = useState([]);
+  const [inputSequence, setInputSequence] = useState([]);
+  const [coins, setCoins] = useState(100);
+  const [isLevelComplete, setIsLevelComplete] = useState(false);
+  const [dragCurrentPos, setDragCurrentPos] = useState(null);
+  const [showLevelList, setShowLevelList] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [shakeScreen, setShakeScreen] = useState(false);
+  const [animateCoin, setAnimateCoin] = useState(false);
+
+  const wheelRef = useRef(null);
+
+  // Load / Init
+  useEffect(() => {
+    const savedLevel = localStorage.getItem('indoWordGame_level');
+    const savedCoins = localStorage.getItem('indoWordGame_coins');
+    if (savedLevel) setCurrentLevelIdx(Math.min(parseInt(savedLevel), LEVELS.length - 1));
+    if (savedCoins) setCoins(parseInt(savedCoins));
+  }, []);
+
+  useEffect(() => {
+    const levelData = LEVELS[currentLevelIdx];
+    setFoundWords([]);
+    setShuffledLetters(levelData.letters.split('').sort(() => 0.5 - Math.random()));
+    setIsLevelComplete(false);
+    setInputSequence([]);
+    localStorage.setItem('indoWordGame_level', currentLevelIdx);
+  }, [currentLevelIdx]);
+
+  useEffect(() => {
+    localStorage.setItem('indoWordGame_coins', coins);
+  }, [coins]);
+
+  // Helpers
+  const currentLevelData = LEVELS[currentLevelIdx];
+  const currentWord = inputSequence.map(idx => shuffledLetters[idx]).join('');
+
+  const getLetterPosition = (index, total) => {
+    const radius = 90; // Lebih besar sedikit
+    const angle = (index * 2 * Math.PI) / total - Math.PI / 2;
+    return { 
+      x: Math.cos(angle) * radius, 
+      y: Math.sin(angle) * radius 
+    };
+  };
+
+  const showMessage = (text, type = "info") => {
+    setMessage({ text, type });
+    if (type === 'error') {
+        setShakeScreen(true);
+        setTimeout(() => setShakeScreen(false), 500);
+    }
+    setTimeout(() => setMessage(null), 2000);
+  };
+
+  const addCoins = (amount) => {
+    setCoins(prev => prev + amount);
+    setAnimateCoin(true);
+    setTimeout(() => setAnimateCoin(false), 1000);
+  };
+
+  // Logic Game
+  const handleShuffle = () => {
+    // Animasi putar
+    const wheel = document.getElementById('letter-wheel');
+    if(wheel) {
+        wheel.style.transform = 'rotate(360deg)';
+        setTimeout(() => wheel.style.transform = 'rotate(0deg)', 300);
+    }
+    setTimeout(() => {
+        setShuffledLetters([...shuffledLetters].sort(() => 0.5 - Math.random()));
+    }, 150);
+  };
+
+  const handleHint = () => {
+    if (coins < 50) {
+      showMessage("Koin kurang!", "error");
+      return;
+    }
+    const unsolvedWord = currentLevelData.words.find(w => !foundWords.includes(w));
+    if (unsolvedWord) {
+      setCoins(prev => prev - 50);
+      showMessage(`Awalan: "${unsolvedWord[0]}"`, "info");
+    }
+  };
+
+  const checkWord = () => {
+    if (currentWord.length === 0) return;
+
+    if (currentLevelData.words.includes(currentWord)) {
+      if (!foundWords.includes(currentWord)) {
+        const newFound = [...foundWords, currentWord];
+        setFoundWords(newFound);
+        
+        if (newFound.length === currentLevelData.words.length) {
+          setTimeout(() => {
+            setIsLevelComplete(true);
+            addCoins(20);
+          }, 600);
+        } else {
+          addCoins(5);
+        }
+      } else {
+        showMessage("Sudah ada!", "warning");
+      }
+    } else {
+      showMessage("Kata salah", "error");
+    }
+    
+    setInputSequence([]);
+    setDragCurrentPos(null);
+  };
+
+  const nextLevel = () => {
+    if (currentLevelIdx < LEVELS.length - 1) {
+      setCurrentLevelIdx(prev => prev + 1);
+    } else {
+      setCurrentLevelIdx(0);
+      showMessage("Tamat! Mengulang dari awal.", "success");
+    }
+  };
+
+  // Pointer Logic
+  const getPointerPos = (e) => {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    if (!wheelRef.current) return { x: 0, y: 0 };
+    const rect = wheelRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    return { x: clientX - centerX, y: clientY - centerY };
+  };
+
+  const handleStart = (e) => {
+    const pos = getPointerPos(e);
+    setDragCurrentPos(pos);
+    checkCollision(pos.x, pos.y);
+  };
+
+  const handleMove = (e) => {
+    if (inputSequence.length === 0 && !dragCurrentPos) return;
+    const pos = getPointerPos(e);
+    setDragCurrentPos(pos);
+    checkCollision(pos.x, pos.y);
+  };
+
+  const checkCollision = (x, y) => {
+    const threshold = 35; 
+    shuffledLetters.forEach((_, idx) => {
+      const pos = getLetterPosition(idx, shuffledLetters.length);
+      const dx = x - pos.x;
+      const dy = y - pos.y;
+      if (Math.sqrt(dx*dx + dy*dy) < threshold) {
+        if (!inputSequence.includes(idx)) {
+          setInputSequence(prev => [...prev, idx]);
+        } else if (inputSequence.length >= 2 && inputSequence[inputSequence.length - 2] === idx) {
+           setInputSequence(prev => prev.slice(0, -1));
+        }
+      }
+    });
+  };
+
+  return (
+    <div className={`min-h-screen relative font-sans overflow-hidden select-none flex flex-col transition-all duration-300 ${shakeScreen ? 'animate-shake' : ''}`}>
+      
+      {/* GLOBAL STYLES & ANIMATIONS */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        
+        body { font-family: 'Nunito', sans-serif; }
+        
+        .bg-game {
+            background: linear-gradient(135deg, #4c1d95 0%, #2563eb 50%, #db2777 100%);
+            background-size: 200% 200%;
+            animation: gradientMove 15s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .blob {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 10s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0.3; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 0.6; }
+            100% { transform: translateY(0) scale(1); opacity: 0.3; }
+        }
+
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+
+        .letter-btn {
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.1s;
+        }
+        .letter-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .letter-btn.active {
+            background: linear-gradient(to bottom, #f59e0b, #d97706);
+            transform: translateY(4px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            border-color: #fbbf24;
+        }
+
+        .slot-empty {
+            background: rgba(0,0,0,0.25);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .slot-filled {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(to bottom right, #fcd34d, #f59e0b);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .coin-pop { animation: coinPop 0.5s ease-out; }
+        @keyframes coinPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); color: #fef08a; }
+            100% { transform: scale(1); }
+        }
+      `}</style>
+
+      {/* BACKGROUND BLOBS */}
+      <div className="bg-game absolute inset-0 -z-10"></div>
+      <div className="blob w-64 h-64 top-0 left-0 blur-3xl"></div>
+      <div className="blob w-96 h-96 bottom-0 right-0 blur-3xl" style={{animationDelay: '2s'}}></div>
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center p-4 z-10 w-full max-w-md mx-auto">
+        <button onClick={() => setShowLevelList(true)} className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition shadow-lg border border-white/10">
+          <Menu className="text-white drop-shadow-md" size={20} />
+        </button>
+        
+        <div className="flex flex-col items-center">
+            <span className="text-white/80 text-xs font-bold tracking-wider uppercase drop-shadow-sm">Level {currentLevelIdx + 1}</span>
+            <div className="flex gap-1 h-2 w-24 bg-black/30 rounded-full mt-1 overflow-hidden">
+                <div 
+                    className="bg-yellow-400 h-full transition-all duration-500" 
+                    style={{width: `${(foundWords.length / currentLevelData.words.length) * 100}%`}}
+                ></div>
+            </div>
+        </div>
+
+        <div className={`flex items-center gap-2 bg-black/30 px-4 py-1.5 rounded-full border border-white/10 shadow-lg ${animateCoin ? 'coin-pop' : ''}`}>
+          <Star className="text-yellow-400 fill-yellow-400 drop-shadow-sm" size={16} />
+          <span className="text-white font-black text-lg tracking-wide">{coins}</span>
+        </div>
+      </div>
+
+      {/* GAME AREA */}
+      <div className="flex-1 flex flex-col items-center justify-between w-full max-w-md mx-auto pb-6 relative">
+        
+        {/* MESSAGE TOAST */}
+        <div className={`absolute top-0 z-30 transition-all duration-300 transform
+          ${message ? 'opacity-100 translate-y-4 scale-100' : 'opacity-0 -translate-y-4 scale-90'}
+        `}>
+          <div className={`px-6 py-2 rounded-full shadow-2xl border-2 font-bold text-white tracking-wide
+            ${message?.type === 'error' ? 'bg-rose-500 border-rose-400' : 
+              message?.type === 'warning' ? 'bg-orange-500 border-orange-400' : 
+              'bg-blue-500 border-blue-400'}`}>
+            {message?.text}
+          </div>
+        </div>
+
+        {/* WORD GRID AREA */}
+        <div className="flex-1 w-full flex items-center justify-center px-4 overflow-y-auto min-h-[200px]">
+          <div className="flex flex-wrap justify-center gap-2 content-center">
+            {currentLevelData.words.map((word, wIdx) => {
+              const isFound = foundWords.includes(word);
+              return (
+                <div key={wIdx} className="flex gap-1.5 mb-2">
+                  {word.split('').map((char, cIdx) => (
+                    <div 
+                      key={cIdx} 
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-black text-xl sm:text-2xl transition-all duration-300
+                        ${isFound ? 'slot-filled text-white border-b-4 border-yellow-600' : 'slot-empty border-2 border-white/10'}`}
+                    >
+                      {isFound && char}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CURRENT INPUT */}
+        <div className="h-12 flex items-center justify-center mb-2">
+           <span className="text-4xl font-black text-white tracking-widest drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] h-10 block">
+             {currentWord}
+           </span>
+        </div>
+
+        {/* CONTROLLER AREA */}
+        <div className="w-full relative flex justify-center items-center h-72">
+          
+          {/* Wheel Background */}
+          <div className="absolute w-64 h-64 bg-black/20 backdrop-blur-md rounded-full border-4 border-white/10 shadow-2xl"></div>
+
+          {/* Connect Lines Canvas */}
+          <div className="absolute w-64 h-64 pointer-events-none z-10">
+            <svg className="w-full h-full overflow-visible">
+               <defs>
+                   <filter id="glow">
+                       <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                       <feMerge>
+                           <feMergeNode in="coloredBlur"/>
+                           <feMergeNode in="SourceGraphic"/>
+                       </feMerge>
+                   </filter>
+               </defs>
+               {inputSequence.map((letterIdx, i) => {
+                if (i === 0) return null;
+                const prevPos = getLetterPosition(inputSequence[i-1], shuffledLetters.length);
+                const currPos = getLetterPosition(letterIdx, shuffledLetters.length);
+                return (
+                  <line key={i} x1={prevPos.x+128} y1={prevPos.y+128} x2={currPos.x+128} y2={currPos.y+128}
+                    stroke="#fbbf24" strokeWidth="12" strokeLinecap="round" filter="url(#glow)" />
+                );
+              })}
+              {inputSequence.length > 0 && dragCurrentPos && (
+                <line x1={getLetterPosition(inputSequence[inputSequence.length-1], shuffledLetters.length).x+128}
+                      y1={getLetterPosition(inputSequence[inputSequence.length-1], shuffledLetters.length).y+128}
+                      x2={dragCurrentPos.x+128} y2={dragCurrentPos.y+128}
+                      stroke="#fbbf24" strokeWidth="12" strokeLinecap="round" strokeDasharray="1 15" strokeOpacity="0.5" />
+              )}
+            </svg>
+          </div>
+
+          {/* Interactive Layer */}
+          <div 
+            ref={wheelRef}
+            id="letter-wheel"
+            className="relative w-64 h-64 rounded-full touch-none z-20 transition-transform duration-300 ease-out"
+            onMouseDown={handleStart} onMouseMove={handleMove} onMouseUp={checkWord}
+            onTouchStart={handleStart} onTouchMove={handleMove} onTouchEnd={checkWord}
+          >
+            {shuffledLetters.map((char, i) => {
+              const pos = getLetterPosition(i, shuffledLetters.length);
+              const isSelected = inputSequence.includes(i);
+              return (
+                <div
+                  key={i}
+                  className={`absolute w-16 h-16 -ml-8 -mt-8 rounded-full flex items-center justify-center text-3xl font-black select-none border-b-4 letter-btn
+                    ${isSelected 
+                      ? 'active text-white border-yellow-600' 
+                      : 'bg-white text-indigo-700 border-indigo-200'}`}
+                  style={{ left: pos.x + 128, top: pos.y + 128 }}
+                >
+                  {char}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Actions */}
+          <button onClick={handleShuffle} className="absolute left-6 bottom-6 w-14 h-14 bg-white rounded-full text-indigo-600 flex items-center justify-center shadow-[0_4px_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-y-1 transition hover:bg-gray-50 border border-gray-100 z-30">
+            <Shuffle size={24} />
+          </button>
+          
+          <button onClick={handleHint} className="absolute right-6 bottom-6 w-14 h-14 bg-gradient-to-b from-yellow-300 to-yellow-500 rounded-full text-white flex flex-col items-center justify-center shadow-[0_4px_0_#b45309] active:shadow-none active:translate-y-1 transition z-30 border border-yellow-300">
+            <Lightbulb size={22} fill="white" className="drop-shadow-sm" />
+            <span className="text-[10px] font-bold -mt-0.5">50</span>
+          </button>
+
+        </div>
+      </div>
+
+      {/* MODALS */}
+      {/* Level List */}
+      {showLevelList && (
+        <div className="absolute inset-0 z-50 bg-indigo-900/95 backdrop-blur-md flex flex-col p-6 animate-fade-in">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-black text-white">Pilih Level</h2>
+            <button onClick={() => setShowLevelList(false)} className="p-2 bg-white/10 rounded-full text-white">
+              <X size={28} />
+            </button>
+          </div>
+          <div className="grid grid-cols-4 gap-4 overflow-y-auto pb-20 no-scrollbar">
+            {LEVELS.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => { setCurrentLevelIdx(idx); setShowLevelList(false); }}
+                className={`aspect-square rounded-2xl flex items-center justify-center font-black text-xl relative shadow-lg transition-transform active:scale-95
+                  ${idx === currentLevelIdx ? 'bg-yellow-400 text-yellow-900 ring-4 ring-yellow-200/50' : 
+                    idx < currentLevelIdx ? 'bg-emerald-500 text-white' : 'bg-indigo-950 text-indigo-700 border-2 border-indigo-800'}`}
+                disabled={idx > currentLevelIdx}
+              >
+                {idx + 1}
+                {idx < currentLevelIdx && <Star size={14} className="absolute top-1 right-1 text-yellow-300 fill-yellow-300" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Level Complete */}
+      {isLevelComplete && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-xs text-center shadow-2xl transform transition-all scale-100 animate-bounce-in relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-300 to-white -z-10 opacity-50"></div>
+            
+            <div className="relative mb-4 inline-block">
+                <Trophy className="w-24 h-24 text-yellow-500 drop-shadow-lg mx-auto" strokeWidth={1.5} />
+                <Star className="absolute top-0 right-0 text-orange-400 fill-orange-400 animate-spin-slow" size={30} />
+            </div>
+            
+            <h2 className="text-3xl font-black text-indigo-900 mb-1">LUAR BIASA!</h2>
+            <p className="text-indigo-400 font-bold mb-6">Level {currentLevelIdx + 1} Selesai</p>
+            
+            <div className="bg-indigo-50 rounded-2xl p-4 mb-6 flex justify-between items-center border border-indigo-100">
+               <span className="text-indigo-400 font-bold text-sm uppercase">Bonus Koin</span>
+               <div className="flex items-center gap-2">
+                   <Star className="text-yellow-500 fill-yellow-500" size={20} />
+                   <span className="text-2xl font-black text-indigo-900">+20</span>
+               </div>
+            </div>
+
+            <button 
+              onClick={nextLevel}
+              className="w-full bg-gradient-to-r from-green-400 to-green-600 text-white font-black py-4 rounded-2xl shadow-[0_6px_0_#15803d] active:shadow-none active:translate-y-1.5 transition text-xl uppercase tracking-wider"
+            >
+              Lanjut
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
